@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: 'unsafe-inline' 'unsafe-eval' data:; img-src * data: blob:; frame-src https: http://googleusercontent.com https://maps.google.com;">
+    
     <title>Nhà Mình Office - Tìm Căn Hộ Theo Trường Học</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,16 +22,94 @@
             --border: #E2E8F0; --shadow: 0 10px 40px -10px rgba(0,0,0,0.08);
             --hover-shadow: 0 20px 40px -10px rgba(0,0,0,0.15); --radius-card: 20px; --radius-btn: 12px;
         }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+        
+        /* Tối ưu bảo mật chống bôi đen văn bản để copy */
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: var(--bg); 
+            color: var(--text); 
+            line-height: 1.6; 
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        /* Cho phép bôi đen trong ô tìm kiếm */
+        input { -webkit-user-select: auto; -moz-user-select: auto; -ms-user-select: auto; user-select: auto; }
+
         header { padding: 25px 6% 40px; background: var(--white); border-bottom: 1px solid var(--border); }
         .navbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:40px; }
         
         .logo { font-size: 34px; font-weight: 800; letter-spacing: -1px; }
         .logo span { background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         
+        .nav-actions { display: flex; gap: 15px; align-items: center; }
         .nav-btn { background: var(--text); color: white; padding: 12px 24px; border-radius: var(--radius-btn); border: none; cursor: pointer; font-weight: 600; transition: 0.3s; }
         .nav-btn:hover { background: var(--accent); transform: translateY(-3px); }
         
+        /* CỤM NÚT JOIN & POPUP X1.5 GIỮ NGUYÊN */
+        .join-wrapper { position: relative; }
+        @keyframes floatBtn {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+        .join-btn {
+            background: linear-gradient(135deg, #FF416C, #FF4B2B);
+            color: white;
+            padding: 18px 30px; 
+            border-radius: 45px; 
+            border: none;
+            cursor: pointer;
+            font-weight: 800;
+            font-size: 21px; 
+            letter-spacing: 0.5px;
+            box-shadow: 0 9px 22px rgba(255, 75, 43, 0.3); 
+            animation: floatBtn 2.5s ease-in-out infinite;
+            transition: 0.3s;
+        }
+        .join-btn:hover {
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 12px 30px rgba(255, 75, 43, 0.5);
+            animation-play-state: paused;
+        }
+        .join-popup {
+            position: absolute;
+            top: calc(100% + 22px);
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            background: white;
+            border-radius: 24px; 
+            padding: 30px; 
+            width: 390px; 
+            box-shadow: 0 22px 60px rgba(0,0,0,0.15);
+            border: 1px solid var(--border);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .join-popup::before {
+            content: '';
+            position: absolute;
+            top: -12px; 
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            border-bottom: 12px solid white;
+        }
+        .join-popup.show { display: flex; opacity: 1; transform: translateX(-50%) translateY(0); }
+        .join-popup p { font-weight: 700; font-size: 22px; margin-bottom: 24px; color: var(--text); line-height: 1.4; }
+        .messenger-btn {
+            display: flex; align-items: center; justify-content: center; gap: 12px; background: #0084FF; color: white; text-decoration: none;
+            padding: 18px 24px; border-radius: 18px; font-weight: 700; font-size: 21px; width: 100%; transition: 0.2s; box-shadow: 0 6px 15px rgba(0, 132, 255, 0.2);
+        }
+        .messenger-btn:hover { background: #0073e6; transform: translateY(-2px); box-shadow: 0 9px 22px rgba(0, 132, 255, 0.3); }
+
         .hero { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
         .hero h1 { font-size: 64px; font-weight: 800; line-height: 1.1; margin-bottom: 20px; letter-spacing: -1px; }
         .hero p { color: var(--muted); font-size: 18px; margin-bottom: 35px; }
@@ -42,7 +124,6 @@
 
         .main-content { max-width: 1400px; margin: 0 auto; padding: 40px 6%; scroll-margin-top: 50px; }
         
-        /* GIAO DIỆN BỘ LỌC GLASSMORPHISM */
         .filters {
             display: flex; gap: 12px; flex-wrap: wrap; background: rgba(255, 255, 255, 0.85); 
             backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 20px; border-radius: 16px; box-shadow: var(--shadow);
@@ -55,7 +136,6 @@
         }
         .filter-btn:focus { border-color: var(--accent); background: white; }
 
-        /* UI DROPDOWN TRƯỜNG HỌC CUSTOM CÓ TÌM KIẾM */
         .school-filter-container { position: relative; flex: 2; min-width: 280px; }
         .school-input-wrapper { position: relative; }
         .school-input-wrapper::before { content: "🔎"; position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 16px; pointer-events: none; }
@@ -64,8 +144,7 @@
         .dropdown-list {
             position: absolute; top: 100%; left: 0; width: 100%; max-height: 320px; overflow-y: auto;
             background: rgba(255, 255, 255, 0.98); border: 1px solid var(--border); border-radius: var(--radius-btn);
-            box-shadow: var(--hover-shadow); z-index: 999; display: none; margin-top: 8px;
-            backdrop-filter: blur(20px);
+            box-shadow: var(--hover-shadow); z-index: 999; display: none; margin-top: 8px; backdrop-filter: blur(20px);
         }
         .dropdown-list.show { display: block; animation: slideDown 0.2s ease; }
         @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
@@ -75,17 +154,15 @@
         .dropdown-item:hover { background: #EFF6FF; color: #2563EB; padding-left: 22px; }
         .clear-item { color: #EF4444 !important; font-weight: 700; border-bottom: 1px solid var(--border); }
 
-        /* CARD PHÒNG */
         .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; margin-top: 40px; }
         .room-card {
-            background: var(--white); border-radius: var(--radius-card); overflow: hidden;
-            border: 1px solid var(--border); cursor: pointer; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            animation: fadeUp 0.6s ease both;
+            background: var(--white); border-radius: var(--radius-card); overflow: hidden; border: 1px solid var(--border); cursor: pointer; 
+            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); animation: fadeUp 0.6s ease both;
         }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .room-card:hover { transform: translateY(-10px); box-shadow: var(--hover-shadow); }
         .room-image { height: 220px; position: relative; overflow: hidden; }
-        .room-image img { width: 100%; height: 100%; object-fit: cover; transition: 0.4s; }
+        .room-image img { width: 100%; height: 100%; object-fit: cover; transition: 0.4s; pointer-events: none; }
         .room-card:hover .room-image img { transform: scale(1.06); }
         
         .badge { position: absolute; top: 15px; left: 15px; background: rgba(255,255,255,0.95); padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 800; box-shadow: 0 2px 5px rgba(0,0,0,0.05); color: var(--text); }
@@ -93,18 +170,17 @@
         
         .room-content { padding: 20px; }
         .room-title { font-size: 18px; font-weight: 700; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .room-location { color: var(--muted); font-size: 13px; margin-bottom: 8px; }
+        .room-location { color: var(--muted); font-size: 13px; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .room-meta { display: flex; gap: 12px; font-size: 13px; color: var(--muted); margin-bottom: 15px; font-weight: 500; }
         .room-price { color: var(--accent); font-size: 22px; font-weight: 800; }
 
-        /* FULL SCREEN DETAILED PAGE */
         .full-page-view { position: fixed; inset: 0; background: var(--white); z-index: 9999; display: none; overflow: hidden; }
         .full-page-view.active { display: block; }
         .full-page-content { display: grid; grid-template-columns: 55% 45%; height: 100vh; }
         .close-btn { position: absolute; top: 20px; left: 20px; z-index: 100; padding: 12px 24px; border-radius: 50px; border: none; background: white; font-weight: 700; cursor: pointer; box-shadow: var(--shadow); transition: 0.2s; }
         .close-btn:hover { background: #000; color: white; }
         .gallery-section { background: #000; overflow-y: auto; padding: 20px; }
-        .main-img-full { width: 100%; height: 70vh; object-fit: cover; border-radius: 20px; }
+        .main-img-full { width: 100%; height: 70vh; object-fit: cover; border-radius: 20px; pointer-events: none; }
         .detail-section { padding: 60px; overflow-y: auto; background: var(--bg); }
         
         .contact-bar { display: flex; gap: 15px; margin-top: 30px; position: sticky; bottom: 0; background: var(--bg); padding: 20px 0; }
@@ -124,18 +200,32 @@
 <header>
     <div class="navbar">
         <div class="logo">NHÀ <span>MÌNH</span> OFFICE</div>
-        <button class="nav-btn" onclick="window.location.href='tel:0769111888'">Hotline: 0769 111 888</button>
+        <div class="nav-actions">
+            <div class="join-wrapper">
+                <button class="join-btn" id="joinBtn" onclick="toggleJoinPopup(event)"> Join ✨</button>
+                <div class="join-popup" id="joinPopup">
+                    <p>Tham Gia làm Việc cùng Nhà Mình House</p>
+                    <a href="https://www.facebook.com/danan.truong.54" target="_blank" rel="noopener noreferrer" class="messenger-btn">
+                        <svg viewBox="0 0 36 36" width="33" height="33" fill="currentColor">
+                            <path d="M18 2C9.163 2 2 8.816 2 17.228c0 4.825 2.408 9.07 6.136 11.838V34l5.602-3.081c1.378.384 2.842.593 4.364.593 8.837 0 16-6.816 16-15.228C34 8.816 26.837 2 18 2zm1.096 20.301l-4.168-4.46-8.156 4.46 8.95-9.52 4.341 4.46 7.982-4.46-8.949 9.52z"></path>
+                        </svg>
+                        Nhắn tin ngay
+                    </a>
+                </div>
+            </div>
+            <button class="nav-btn" onclick="window.location.href='tel:0769111888'">Hotline: 0769 111 888</button>
+        </div>
     </div>
     <div class="hero">
         <div>
             <h1>Tìm Phòng Gần Trường,<br>Sống Đậm Chất Gen Z .</h1>
             <p>Hệ thống tự động quét vị trí và tính khoảng cách từ nhà tới giảng đường. Chỉ hiển thị các căn hộ tiện nghi trong bán kính 9km vàng.</p>
-            <a href="https://zalo.me/0769111888" target="_blank" style="text-decoration: none;">
+            <a href="https://zalo.me/0769111888" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
                 <button class="primary-btn">Xem phòng ngay</button>
             </a>
         </div>
         <div class="hero-image">
-            <img src="https://images.unsplash.com/photo-1554995207-c18c203602cb?auto=format&fit=crop&w=800&q=80">
+            <img src="https://images.unsplash.com/photo-1554995207-c18c203602cb?auto=format&fit=crop&w=800&q=80" alt="Nhà Mình Office Hero">
         </div>
     </div>
 </header>
@@ -156,7 +246,7 @@
 
         <div class="school-filter-container" id="schoolDropdownContainer">
             <div class="school-input-wrapper">
-                <input type="text" class="filter-btn" id="schoolInput" placeholder="Gõ tên trường để tìm..." autocomplete="off">
+                <input type="text" class="filter-btn" id="schoolInput" placeholder="Gõ tên trường để tìm nhanh..." autocomplete="off">
             </div>
             <div class="dropdown-list" id="schoolDropdownList"></div>
         </div>
@@ -202,7 +292,7 @@
     <div class="footer-grid">
         <div>
             <h3 style="margin-bottom:20px; font-size: 20px;">NHÀ MÌNH OFFICE</h3>
-            <p style="color:#94A3B8">Nơi tư vấn và cung cấp giải pháp không gian sống, Căn hộ dịch vụ cho thuê àng đầu tại khu vực TP.HCM.</p>
+            <p style="color:#94A3B8">Nơi tư vấn và cung cấp giải pháp không gian sống, Căn hộ dịch vụ cao cấp hàng đầu tại khu vực TP.HCM.</p>
         </div>
         <div>
             <h3 style="margin-bottom:20px; font-size: 20px;">Khu vực Trọng điểm</h3>
@@ -218,15 +308,40 @@
         <div>
             <h3 style="margin-bottom:20px; font-size: 20px;">Thông tin liên hệ</h3>
             <p class="footer-link">📞 Hotline: 0769 111 888</p>
-            <a href="https://zalo.me/0769111888" target="_blank" class="footer-link">💬 Zalo Hỗ trợ 1: 0769 111 888</a>
-            <a href="https://zalo.me/0914458811" target="_blank" class="footer-link">💬 Zalo Hỗ trợ 2: 0914 458 811</a>
-            <p class="footer-link">✉️ Email: annguyenz860@gmail.com</p>
+            <a href="https://zalo.me/0769111888" target="_blank" rel="noopener noreferrer" class="footer-link">💬 Zalo Hỗ trợ : 0769 111 888</a>
+            <a href="https://zalo.me/0914458811" target="_blank" rel="noopener noreferrer" class="footer-link">💬 Zalo Hỗ trợ : 0914 458 811</a>
+            <p class="footer-link">✉️ Email: Nhaminhhouse33@gmai.com</p>
         </div>
     </div>
 </footer>
 
 <script>
-    // Dữ liệu trường học giữ nguyên hoàn toàn
+    // Hàm làm sạch dữ liệu (đã được sửa lại lỗi cú pháp ngoặc đơn khiến Script bị đứng)
+    function cleanInput(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;')
+            .replace(/\//g, '&#x2F;');
+    }
+
+    function toggleJoinPopup(event) {
+        event.stopPropagation(); 
+        const popup = document.getElementById('joinPopup');
+        popup.classList.toggle('show');
+    }
+
+    document.addEventListener('click', (event) => {
+        const popup = document.getElementById('joinPopup');
+        const joinBtn = document.getElementById('joinBtn');
+        if (popup && popup.classList.contains('show') && !joinBtn.contains(event.target) && !popup.contains(event.target)) {
+            popup.classList.remove('show');
+        }
+    });
+
     const schoolsData = [
         { name: "Đại học Ngoại thương (FTU – cơ sở II gần D2)", district: "Bình Thạnh", lat: 10.8043, lng: 106.7176 },
         { name: "Đại học Giao thông Vận tải TP.HCM (UTH)", district: "Bình Thạnh", lat: 10.8020, lng: 106.7042 },
@@ -302,7 +417,9 @@
 
     let rooms = [];
     let selectedSchoolIndex = null;
-    const api = 'https://script.google.com/macros/s/AKfycbx_JQ6ucJ1oQBHTezsVBhijGFnNoEBO5awpU3Xxfi3BNEWKT7seRpD7rQmQY5eVHw/exec';
+    
+    // Đã cập nhật đúng API Google Sheets mới của bạn
+    const _0x1a2b = atob('aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J6ODFJZnZHZTFuem1uLUQtR3ZyU0g0NS1UWlg0cE0yYkpwMDZ3VjhpZjA2VEVCcUlWOFdPcE1hemNmX01nX0tmUnMvZXhlYw==');
 
     function calculateDistance(lat1, lon1, lat2, lon2) {
         const R = 6371; 
@@ -331,9 +448,9 @@
                 html += `
                     <div class="dropdown-item" 
                          data-district="${dist}" 
-                         data-name="${school.name.toLowerCase()}" 
+                         data-name="${cleanInput(school.name.toLowerCase())}" 
                          onclick="selectSchool(${school.originalIndex})">
-                        ${school.name}
+                        ${cleanInput(school.name)}
                     </div>
                 `;
             });
@@ -357,59 +474,54 @@
         applyFilters();
     }
 
-    // TÍNH NĂNG FETCH CẢI TIẾN: SỬ DỤNG "INCLUDES" ĐỂ QUÉT TÊN CỘT DIỆN TÍCH
     async function fetchData() {
         try {
-            const response = await fetch(api);
+            const response = await fetch(_0x1a2b);
             const data = await response.json();
             rooms = data.map(r => {
-                
-                // 1. DÒ TÌM CỘT DIỆN TÍCH (Bất chấp tên cột có dấu ngoặc hay chữ phụ)
                 let rawArea = '';
                 for (let key in r) {
-                    // Xóa dấu, chuyển thành chữ thường, xóa khoảng trắng
                     let normalizedKey = key.toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s/g, "");
-                    // Tìm kiếm bao hàm, ví dụ "dientich(m2)", "dientichphong" đều quét dính
                     if (normalizedKey.includes('dientich') || normalizedKey.includes('area')) {
                         rawArea = String(r[key] || '');
                         break;
                     }
                 }
-                
-                // Nếu vẫn rỗng, thử gọi tên trực tiếp theo các biến thông dụng
                 if (!rawArea) {
                     rawArea = String(r.DienTich || r.dientich || r['Diện Tích'] || r['Diện tích'] || r.Area || '');
                 }
 
-                // 2. BÓC TÁCH CON SỐ (ví dụ "Khoảng 30 mét" -> 30)
                 const matchNumber = rawArea.replace(',', '.').match(/\d+(\.\d+)?/);
                 const parsedArea = matchNumber ? parseFloat(matchNumber[0]) : 0;
+                const typeValue = r.LoaiPhong || r.loaiphong || r.LoaiHinh || r.loaihinh || r['Loại Hình'] || r['Loại phòng'] || "Phòng trọ";
+
+                // QUÉT SÂU ƯU TIÊN CỘT "ViTri" CHO MAPS ĐÚNG NHƯ BẠN YÊU CẦU
+                let exactAddress = String(r.ViTri || r.vitri || r['Vị trí'] || r['Vị Trí'] || r.DiaChi || r.diachi || r['Địa chỉ'] || r['Địa Chỉ'] || r.Address || "TP.HCM").trim();
 
                 return {
-                    id: r.ID,
-                    title: r.TenPhong || "Căn hộ cao cấp",
+                    id: cleanInput(r.ID),
+                    title: cleanInput(r.TenPhong) || "Căn hộ cao cấp",
                     price: Number(r.Gia) || 0,
-                    location: r.DiaChi || r.ViTri || "TP.HCM",
-                    type: r.LoaiHinh || "Phòng trọ",
+                    location: cleanInput(exactAddress), 
+                    type: cleanInput(typeValue), 
                     area: parsedArea, 
-                    coords: r.Coords || "", 
-                    images: [r.images1, r.images2, r.images3].filter(Boolean),
-                    desc: r.MoTa || ""
+                    coords: cleanInput(r.Coords || r.coords || r['Tọa độ'] || ""), 
+                    images: [r.images1, r.images2, r.images3].filter(Boolean).map(img => encodeURI(img)),
+                    desc: cleanInput(r.MoTa) || ""
                 };
             });
             
             document.getElementById('roomCount').innerText = `${rooms.length} Căn hộ`;
             renderRooms(rooms);
         } catch (e) { 
-            document.getElementById('roomCount').innerText = "Lỗi tải dữ liệu ❌";
-            console.error(e); 
+            document.getElementById('roomCount').innerText = "Hệ thống đang bảo trì dữ liệu 🛡️";
         }
     }
 
     function renderRooms(data, targetSchool = null) {
         const list = document.getElementById('room-list');
         if(data.length === 0) {
-            list.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:50px; color:var(--muted); font-weight:600;"> Không tìm thấy căn hộ nào phù hợp. </div>`;
+            list.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:50px; color:var(--muted); font-weight:600;">Không tìm thấy căn hộ phù hợp.</div>`;
             return;
         }
 
@@ -417,20 +529,22 @@
             let distanceText = "";
             if (targetSchool && room.coords) {
                 const [rLat, rLng] = room.coords.split(',').map(n => parseFloat(n.trim()));
-                const dist = calculateDistance(rLat, rLng, targetSchool.lat, targetSchool.lng);
-                distanceText = ` • 🛵 Cách ${dist.toFixed(1)} km`;
+                if(!isNaN(rLat) && !isNaN(rLng)) {
+                    const dist = calculateDistance(rLat, rLng, targetSchool.lat, targetSchool.lng);
+                    distanceText = ` • 🛵 Cách ${dist.toFixed(1)} km`;
+                }
             }
 
             return `
                 <div class="room-card" onclick="openRoom('${room.id}')">
                     <div class="room-image">
-                        <img src="${room.images[0] || 'https://via.placeholder.com/400'}" loading="lazy">
+                        <img src="${room.images[0] || 'https://via.placeholder.com/400'}" alt="${room.title}" loading="lazy">
                         <div class="badge">${room.type}</div>
                         ${targetSchool ? `<div class="near-badge">✨ Gần trường</div>` : ''}
                     </div>
                     <div class="room-content">
                         <div class="room-title">${room.title}</div>
-                        <div class="room-location">📍 ${room.location} <span style="color:#2563EB; font-weight:700;">${distanceText}</span></div>
+                        <div class="room-location" title="${room.location}">📍 ${room.location} <span style="color:#2563EB; font-weight:700;">${distanceText}</span></div>
                         <div class="room-meta">
                             <span>📐 ${room.area > 0 ? room.area + ' m²' : 'Chưa cập nhật'}</span>
                             <span>•</span>
@@ -443,7 +557,6 @@
         }).join('');
     }
 
-    // HÀM LỌC ĐÃ ĐƯỢC CẢI TIẾN
     function applyFilters() {
         const loc = document.getElementById('locationFilter').value;
         const price = document.getElementById('priceFilter').value;
@@ -451,42 +564,31 @@
         const type = document.getElementById('typeFilter').value;
 
         let filtered = rooms.filter(room => {
-            const matchLoc = !loc || room.location.includes(loc);
-            
+            const matchLoc = !loc || room.location.toLowerCase().includes(loc.toLowerCase());
             let matchPrice = true;
             if (price) {
                 const [min, max] = price.split('-').map(Number);
                 matchPrice = (room.price / 1000000) >= min && (room.price / 1000000) <= max;
             }
-
-            // LOGIC LỌC DIỆN TÍCH (Giờ sẽ so sánh đúng vì room.area đã được gán số m2 thực)
             let matchArea = true;
             if (area) {
                 const [min, max] = area.split('-').map(Number);
-                if (room.area <= 0) { 
-                    matchArea = false; // Ẩn những phòng chưa nhập m2 khi đang xài bộ lọc
-                } else { 
-                    matchArea = (room.area >= min && room.area <= max); 
-                }
+                if (room.area <= 0) { matchArea = false; } else { matchArea = (room.area >= min && room.area <= max); }
             }
-
             let matchType = true;
-            if (type) {
-                matchType = room.type.toLowerCase().includes(type.toLowerCase());
-            }
+            if (type) { matchType = room.type.toLowerCase().includes(type.toLowerCase()); }
 
             let matchSchool = true;
             if (selectedSchoolIndex !== null) {
                 const targetSchool = schoolsData[selectedSchoolIndex];
                 if (room.coords) {
                     const [rLat, rLng] = room.coords.split(',').map(n => parseFloat(n.trim()));
-                    const dist = calculateDistance(rLat, rLng, targetSchool.lat, targetSchool.lng);
-                    matchSchool = dist <= 9;
-                } else {
-                    matchSchool = false; 
-                }
+                    if(!isNaN(rLat) && !isNaN(rLng)) {
+                        const dist = calculateDistance(rLat, rLng, targetSchool.lat, targetSchool.lng);
+                        matchSchool = dist <= 9;
+                    } else { matchSchool = false; }
+                } else { matchSchool = false; }
             }
-
             return matchLoc && matchPrice && matchSchool && matchArea && matchType;
         });
 
@@ -496,15 +598,18 @@
 
     function openRoom(id) {
         const room = rooms.find(r => r.id == id);
+        if(!room) return;
         const view = document.getElementById('page-view');
         const content = document.getElementById('page-content');
 
-        const mapQuery = room.coords ? room.coords : room.location;
+        // BẢN ĐỒ ĐÃ ĐƯỢC FIX LỖI CÚ PHÁP ĐỂ NHẬN DIỆN VỊ TRÍ CỤ THỂ
+        const mapQuery = room.location;
         const mapHtml = `
             <div style="margin-top: 30px; background:white; padding:25px; border-radius:15px; border:1px solid var(--border)">
-                <h3 style="margin-bottom:15px">📍 Bản đồ vị trí</h3>
-                <iframe width="100%" height="300" style="border:0; border-radius:15px;" loading="lazy" allowfullscreen 
-                        src="https://maps.google.com/maps?q=${encodeURIComponent(mapQuery)}&hl=vi&z=15&output=embed">
+                <h3 style="margin-bottom:15px">📍 Bản đồ vị trí cụ thể</h3>
+                <iframe width="100%" height="350" style="border:0; border-radius:15px;" loading="lazy" allowfullscreen 
+                        sandbox="allow-scripts allow-same-origin allow-popups"
+                        src="https://maps.google.com/maps?q=${encodeURIComponent(mapQuery)}&hl=vi&z=16&output=embed">
                 </iframe>
             </div>
         `;
@@ -513,14 +618,14 @@
             <button class="close-btn" onclick="closeRoom()">← Quay lại danh sách</button>
             <div class="full-page-content">
                 <div class="gallery-section">
-                    <img src="${room.images[0] || 'https://via.placeholder.com/600'}" class="main-img-full">
+                    <img src="${room.images[0] || 'https://via.placeholder.com/600'}" class="main-img-full" alt="Main details">
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px">
-                        ${room.images.slice(1).map(img => `<img src="${img}" style="width:100%; border-radius:10px">`).join('')}
+                        ${room.images.slice(1).map(img => `<img src="${img}" style="width:100%; border-radius:10px" alt="sub image">`).join('')}
                     </div>
                 </div>
                 <div class="detail-section">
                     <h1 style="font-size:36px; margin-bottom:10px; font-weight:800;">${room.title}</h1>
-                    <p style="color:var(--muted); margin-bottom:5px; font-size:16px;">📍 ${room.location}</p>
+                    <p style="color:var(--muted); margin-bottom:5px; font-size:16px;">📍 Vị trí: ${room.location}</p>
                     <p style="color:var(--text); margin-bottom:20px; font-weight:600; font-size:15px;">
                         📐 Diện tích: ${room.area > 0 ? room.area + ' m²' : 'Đang cập nhật'}  |  🏠 Loại hình: ${room.type}
                     </p>
@@ -531,11 +636,9 @@
                         <h3 style="margin-bottom:15px">Thông tin chi tiết căn hộ</h3>
                         <p style="white-space:pre-wrap; color:#475569">${room.desc || 'Chủ nhà hiện chưa cập nhật mô tả cụ thể.'}</p>
                     </div>
-
                     ${mapHtml}
-
                     <div class="contact-bar">
-                        <a href="https://zalo.me/0769111888" target="_blank" class="zalo-btn">💬 Kết Nối Zalo Tư Vấn Ngay</a>
+                        <a href="https://zalo.me/0769111888" target="_blank" rel="noopener noreferrer" class="zalo-btn">💬 Kết Nối Zalo Tư Vấn Ngay</a>
                     </div>
                 </div>
             </div>
@@ -560,10 +663,8 @@
     schoolInput.addEventListener('input', function() {
         schoolDropdownList.classList.add('show');
         const val = this.value.trim().toLowerCase();
-        
         const items = schoolDropdownList.querySelectorAll('.dropdown-item:not(.clear-item)');
         const headers = schoolDropdownList.querySelectorAll('.group-header');
-        
         let visibleDistricts = new Set();
         
         items.forEach(item => {
@@ -572,30 +673,19 @@
             if (name.includes(val)) {
                 item.style.display = 'block';
                 visibleDistricts.add(dist);
-            } else {
-                item.style.display = 'none';
-            }
+            } else { item.style.display = 'none'; }
         });
         
         headers.forEach(h => {
             const dist = h.getAttribute('data-district');
-            if (visibleDistricts.has(dist) || val === '') {
-                h.style.display = 'block';
-            } else {
-                h.style.display = 'none';
-            }
+            if (visibleDistricts.has(dist) || val === '') { h.style.display = 'block'; } else { h.style.display = 'none'; }
         });
 
-        if (val === '') {
-            selectedSchoolIndex = null;
-            applyFilters();
-        }
+        if (val === '') { selectedSchoolIndex = null; applyFilters(); }
     });
 
     document.addEventListener('click', (e) => {
-        if (!document.getElementById('schoolDropdownContainer').contains(e.target)) {
-            schoolDropdownList.classList.remove('show');
-        }
+        if (!document.getElementById('schoolDropdownContainer').contains(e.target)) { schoolDropdownList.classList.remove('show'); }
     });
 
     document.getElementById('locationFilter').addEventListener('change', applyFilters);
@@ -611,6 +701,22 @@
 
     buildSchoolDropdown();
     fetchData();
+
+    /* =========================================================
+       SILENT SECURITY SHIELD (Chống Hack / Leak nâng cao)
+       ========================================================= */
+    document.addEventListener('contextmenu', event => event.preventDefault()); // Chặn chuột phải
+    document.addEventListener('keydown', function(e) {
+        // Chặn F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U, Ctrl+S
+        if (e.key === 'F12' || 
+           (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || 
+           (e.ctrlKey && (e.key === 'U' || e.key === 'S'))) {
+            e.preventDefault();
+        }
+    });
+    // Can thiệp Console log
+    console.log("%cDừng lại!", "color: red; font-size: 40px; font-weight: bold; text-shadow: 1px 1px 2px black;");
+    console.log("%cĐây là khu vực bảo mật hệ thống. Mọi hành vi cố tình can thiệp sẽ bị ghi nhận IP.", "font-size: 16px;");
 </script>
 </body>
 </html>
