@@ -81,8 +81,8 @@
             background: white;
             border-radius: 24px; 
             padding: 30px; 
-            width: 90vw; /* Giúp không bị phình to trên mobile */
-            max-width: 390px; /* Vẫn giữ form chuẩn trên web */
+            width: 90vw;
+            max-width: 390px;
             box-shadow: 0 22px 60px rgba(0,0,0,0.15);
             border: 1px solid var(--border);
             display: none;
@@ -196,9 +196,14 @@
         /* ĐIỀU CHỈNH RESPONSIVE CHO CÁC THIẾT BỊ KHÁC NHAU */
         @media(max-width: 1000px) { 
             .hero { grid-template-columns: 1fr; text-align: center; gap: 40px; } 
-            .full-page-content { grid-template-columns: 1fr; } 
-            .gallery-section { height: auto; }
-            .detail-section { padding: 40px; }
+            
+            /* --- ĐÃ FIX LỖI CUỘN Ở ĐÂY --- */
+            /* Cho phép cuộn toàn bộ popup thay vì để 2 khung cuộn độc lập */
+            .full-page-view { overflow-y: auto; } 
+            .full-page-content { display: block; height: auto; } 
+            .gallery-section { overflow: visible; height: auto; }
+            .detail-section { padding: 40px; overflow: visible; height: auto; }
+            /* ----------------------------- */
         }
 
         /* ĐẶC TRỊ CHO ĐIỆN THOẠI (Dưới 768px) */
@@ -209,13 +214,13 @@
             .nav-btn, .join-wrapper, .join-btn { width: 100%; text-align: center; }
             .join-btn { padding: 15px 20px; font-size: 18px; }
             
-            .hero h1 { font-size: 40px; } /* Thu nhỏ font cho khỏi phình */
+            .hero h1 { font-size: 40px; }
             .hero-image { height: 280px; }
             
             .filters { flex-direction: column; margin-top: 10px; }
             .filter-btn, .school-filter-container { width: 100%; min-width: unset; }
             
-            .grid { grid-template-columns: 1fr; } /* 1 cột thay vì minmax 320px */
+            .grid { grid-template-columns: 1fr; }
             
             .main-content { padding: 30px 5%; }
             footer { padding: 40px 5%; }
