@@ -527,50 +527,69 @@
         list.classList.remove('show');
         applyFilters();
     }
-
+    
     async function fetchData() {
-        try {
-            const response = await fetch(_0x1a2b);
-            const data = await response.json();
-            rooms = data.map(r => {
-                let rawArea = '';
-                for (let key in r) {
-                    let normalizedKey = key.toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s/g, "");
-                    if (normalizedKey.includes('dientich') || normalizedKey.includes('area')) {
-                        rawArea = String(r[key] || '');
-                        break;
+    try {
+        const response = await fetch(_0x1a2b);
+        const data = await response.json();
+        rooms = data.map(r => {
+            let rawArea = '';
+            for (let key in r) {
+                let normalizedKey = key.toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s/g, "");
+                if (normalizedKey.includes('dientich') || normalizedKey.includes('area')) {
+                    rawArea = String(r[key] || '');
+                    break;
+                }
+            }
+            if (!rawArea) {
+                rawArea = String(r.DienTich || r.dientich || r['Diện Tích'] || r['Diện tích'] || r.Area || '');
+            }
+
+            const matchNumber = rawArea.replace(',', '.').match(/\d+(\.\d+)?/);
+            const parsedArea = matchNumber ? parseFloat(matchNumber[0]) : 0;
+            const typeValue = r.LoaiPhong || r.loaiphong || r.LoaiHinh || r.loaihinh || r['Loại Hình'] || r['Loại phòng'] || "Phòng trọ";
+
+            let exactAddress = String(r.ViTri || r.vitri || r['Vị trí'] || r['Vị Trí'] || r.DiaChi || r.diachi || r['Địa chỉ'] || r['Địa Chỉ'] || r.Address || "TP.HCM").trim();
+
+            // --- CODE FIX LỖI ẢNH CỦA EM Ở ĐÂY ---
+            // Tự động quét toàn bộ các cột trên Google Sheets để tìm ảnh
+            let allImages = [];
+            for (let key in r) {
+                // Đưa tên cột về chữ thường, bỏ dấu để dễ nhận diện
+                let keyLower = key.toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                // Nếu tên cột có chứa chữ "image", "anh", hoặc "pic" và có chứa dữ liệu
+                if ((keyLower.includes('image') || keyLower.includes('anh') || keyLower.includes('pic')) && r[key]) {
+                    let imgUrl = String(r[key]).trim();
+                    // Đảm bảo dữ liệu lấy được là một đường link (bắt đầu bằng http)
+                    if (imgUrl.startsWith('http')) {
+                        allImages.push(encodeURI(imgUrl));
                     }
                 }
-                if (!rawArea) {
-                    rawArea = String(r.DienTich || r.dientich || r['Diện Tích'] || r['Diện tích'] || r.Area || '');
-                }
+            }
+            // -------------------------------------
 
-                const matchNumber = rawArea.replace(',', '.').match(/\d+(\.\d+)?/);
-                const parsedArea = matchNumber ? parseFloat(matchNumber[0]) : 0;
-                const typeValue = r.LoaiPhong || r.loaiphong || r.LoaiHinh || r.loaihinh || r['Loại Hình'] || r['Loại phòng'] || "Phòng trọ";
-
-                // QUÉT SÂU ƯU TIÊN CỘT "ViTri" CHO MAPS ĐÚNG NHƯ BẠN YÊU CẦU
-                let exactAddress = String(r.ViTri || r.vitri || r['Vị trí'] || r['Vị Trí'] || r.DiaChi || r.diachi || r['Địa chỉ'] || r['Địa Chỉ'] || r.Address || "TP.HCM").trim();
-
-                return {
-                    id: cleanInput(r.ID),
-                    title: cleanInput(r.TenPhong) || "Căn hộ cao cấp",
-                    price: Number(r.Gia) || 0,
-                    location: cleanInput(exactAddress), 
-                    type: cleanInput(typeValue), 
-                    area: parsedArea, 
-                    coords: cleanInput(r.Coords || r.coords || r['Tọa độ'] || ""), 
-                    images: [r.images1, r.images2, r.images3].filter(Boolean).map(img => encodeURI(img)),
-                    desc: cleanInput(r.MoTa) || ""
-                };
-            });
-            
-            document.getElementById('roomCount').innerText = `${rooms.length} Căn hộ`;
-            renderRooms(rooms);
-        } catch (e) { 
-            document.getElementById('roomCount').innerText = "Hệ thống đang bảo trì dữ liệu 🛡️";
-        }
+            return {
+                id: cleanInput(r.ID),
+                title: cleanInput(r.TenPhong) || "Căn hộ cao cấp",
+                price: Number(r.Gia) || 0,
+                location: cleanInput(exactAddress), 
+                type: cleanInput(typeValue), 
+                area: parsedArea, 
+                coords: cleanInput(r.Coords || r.coords || r['Tọa độ'] || ""), 
+                
+                // Sử dụng mảng động vừa quét được thay cho mảng cứng 3 cột lúc nãy
+                images: allImages.length > 0 ? allImages : ["https://via.placeholder.com/600"],
+                
+                desc: cleanInput(r.MoTa) || ""
+            };
+        });
+        
+        document.getElementById('roomCount').innerText = `${rooms.length} Căn hộ`;
+        renderRooms(rooms);
+    } catch (e) { 
+        document.getElementById('roomCount').innerText = "Hệ thống đang bảo trì dữ liệu 🛡️";
     }
+}
 
     function renderRooms(data, targetSchool = null) {
         const list = document.getElementById('room-list');
@@ -612,43 +631,77 @@
     }
 
     function applyFilters() {
-        const loc = document.getElementById('locationFilter').value;
-        const price = document.getElementById('priceFilter').value;
-        const area = document.getElementById('areaFilter').value;
-        const type = document.getElementById('typeFilter').value;
+    const loc = document.getElementById('locationFilter')?.value || "";
+    const price = document.getElementById('priceFilter')?.value || "";
+    const area = document.getElementById('areaFilter')?.value || "";
+    const type = document.getElementById('typeFilter')?.value || "";
 
-        let filtered = rooms.filter(room => {
-            const matchLoc = !loc || room.location.toLowerCase().includes(loc.toLowerCase());
-            let matchPrice = true;
-            if (price) {
-                const [min, max] = price.split('-').map(Number);
-                matchPrice = (room.price / 1000000) >= min && (room.price / 1000000) <= max;
-            }
-            let matchArea = true;
-            if (area) {
-                const [min, max] = area.split('-').map(Number);
-                if (room.area <= 0) { matchArea = false; } else { matchArea = (room.area >= min && room.area <= max); }
-            }
-            let matchType = true;
-            if (type) { matchType = room.type.toLowerCase().includes(type.toLowerCase()); }
-
-            let matchSchool = true;
-            if (selectedSchoolIndex !== null) {
-                const targetSchool = schoolsData[selectedSchoolIndex];
-                if (room.coords) {
-                    const [rLat, rLng] = room.coords.split(',').map(n => parseFloat(n.trim()));
-                    if(!isNaN(rLat) && !isNaN(rLng)) {
-                        const dist = calculateDistance(rLat, rLng, targetSchool.lat, targetSchool.lng);
-                        matchSchool = dist <= 9;
-                    } else { matchSchool = false; }
-                } else { matchSchool = false; }
-            }
-            return matchLoc && matchPrice && matchSchool && matchArea && matchType;
-        });
-
-        document.getElementById('roomCount').innerText = `${filtered.length} Căn hộ`;
-        renderRooms(filtered, selectedSchoolIndex !== null ? schoolsData[selectedSchoolIndex] : null);
+    console.clear();
+    console.log("--- BẮT ĐẦU CHẠY BỘ LỌC ---");
+    if (selectedSchoolIndex !== null) {
+        console.log("📍 Đang lọc theo trường:", schoolsData[selectedSchoolIndex].name);
     }
+
+    let filtered = rooms.filter((room, index) => {
+        // Phòng thủ: Thêm optional chaining (?.) đề phòng cột location/type trong Gsheet bị bỏ trống (null/undefined)
+        const matchLoc = !loc || (room.location && room.location.toLowerCase().includes(loc.toLowerCase()));
+        
+        let matchPrice = true;
+        if (price) {
+            const [min, max] = price.split('-').map(Number);
+            // Lưu ý: Nếu room.price trong Sheet là chuỗi có chữ (VD: "3 triệu") thì parseFloat sẽ bị lỗi NaN
+            const roomPriceVal = parseFloat(room.price) / 1000000; 
+            matchPrice = roomPriceVal >= min && roomPriceVal <= max;
+        }
+
+        let matchArea = true;
+        if (area) {
+            const [min, max] = area.split('-').map(Number);
+            const roomAreaVal = parseFloat(room.area);
+            if (isNaN(roomAreaVal) || roomAreaVal <= 0) { matchArea = false; } 
+            else { matchArea = (roomAreaVal >= min && roomAreaVal <= max); }
+        }
+
+        let matchType = true;
+        if (type) { 
+            matchType = room.type && room.type.toLowerCase().includes(type.toLowerCase()); 
+        }
+
+        let matchSchool = true;
+        let dist = null;
+
+        if (selectedSchoolIndex !== null) {
+            const targetSchool = schoolsData[selectedSchoolIndex];
+            
+            // Xóa khoảng trắng thừa và kiểm tra có dữ liệu coords không
+            if (room.coords && typeof room.coords === 'string') {
+                const [rLat, rLng] = room.coords.split(',').map(n => parseFloat(n.trim()));
+                
+                if (!isNaN(rLat) && !isNaN(rLng)) {
+                    dist = calculateDistance(rLat, rLng, targetSchool.lat, targetSchool.lng);
+                    matchSchool = dist <= 9;
+                } else { 
+                    matchSchool = false; 
+                }
+            } else { 
+                matchSchool = false; 
+            }
+        }
+
+        // --- IN RA LOG ĐỂ BẮT LỖI (Quan trọng nhất) ---
+        if (selectedSchoolIndex !== null && room.coords) {
+            console.log(`Phòng dòng ${index + 1}: Coords[${room.coords}] | Dist: ${dist ? dist.toFixed(2) + 'km' : 'Lỗi'} | Pass School? ${matchSchool} | Pass Loc? ${matchLoc} | Pass Price? ${matchPrice}`);
+        }
+        // ----------------------------------------------
+
+        return matchLoc && matchPrice && matchSchool && matchArea && matchType;
+    });
+
+    console.log(`✅ Kết quả: Tìm thấy ${filtered.length} phòng hợp lệ!`);
+
+    document.getElementById('roomCount').innerText = `${filtered.length} Căn hộ`;
+    renderRooms(filtered, selectedSchoolIndex !== null ? schoolsData[selectedSchoolIndex] : null);
+}
 
     function openRoom(id) {
         const room = rooms.find(r => r.id == id);
